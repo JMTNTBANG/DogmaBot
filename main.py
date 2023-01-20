@@ -3,6 +3,7 @@ import discord
 from discord.ui import Button, View
 from discord import app_commands
 from dotenv import load_dotenv
+import time
 
 intents = discord.Intents.default()
 intents.members = True
@@ -118,11 +119,23 @@ class aclient(discord.Client):
             await tree.sync(guild=discord.Object(id=1053851544765874216))
             self.synced=True
             print('Commands Synced')
-        print(f'Bot is online')
-        # await client.change_presence(activity=discord.Game(name="DEBUG MODE"))
-        # print('Bot Presence changed to \"Playing DEBUG MODE\"')
-        await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="live bands"))
-        print('Bot Presence changed to \"Listening to live bands\"')
+            print(f'Bot is online')
+            if 'debug' in os.listdir('./'):
+                await client.change_presence(activity=discord.Game(name="DEBUG MODE"))
+                print('Bot Presence changed to \"Playing DEBUG MODE\"')
+                await client.get_channel(1065861941395988550).send(embed=discord.Embed(
+                    title='Online Status',
+                    description=f'DogmaBot Online Since <t:{str(int(time.time()))}:R> <@&1065864813009436712>',
+                    color=discord.Color.green()
+                    ))
+            else:
+                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="my stinky poos"))
+                print('Bot Presence changed to \"Watching my stinky poos\"')
+                await client.get_channel(1065861941395988550).send(embed=discord.Embed(
+                    title='Online Status',
+                    description=f'DogmaBot Online Since <t:{str(int(time.time()))}:R>',
+                    color=discord.Color.green()
+                    ))
 
         await client.get_channel(1054578163520376862).purge()
         await sendButtonRoles()
