@@ -151,7 +151,7 @@ async def on_message(message: discord.Message):
                 embed=discord.Embed(
                     title=message.content
                     ).set_author(
-                        name=f'{message.author.display_name}#{+message.author.discriminator}',
+                        name=f'{message.author.display_name}#{message.author.discriminator}',
                         icon_url=message.author.avatar
                         ))
 
