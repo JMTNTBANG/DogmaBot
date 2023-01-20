@@ -129,8 +129,8 @@ class aclient(discord.Client):
                     color=discord.Color.green()
                     ))
             else:
-                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="my stinky poos"))
-                print('Bot Presence changed to \"Watching my stinky poos\"')
+                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="Hotdogs being made"))
+                print('Bot Presence changed to \"Hotdogs being made\"')
                 await client.get_channel(1065861941395988550).send(embed=discord.Embed(
                     title='Online Status',
                     description=f'DogmaBot Online Since <t:{str(int(time.time()))}:R>',
