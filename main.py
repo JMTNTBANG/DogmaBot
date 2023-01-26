@@ -4,6 +4,7 @@ from discord.ui import Button, View
 from discord import app_commands
 from dotenv import load_dotenv
 import time
+import sys
 
 intents = discord.Intents.default()
 intents.members = True
@@ -12,7 +13,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-# Function Definitions
+# Definitions
 async def sendButtonRoles():
     Foodies=Button(label="Food Channels", style=discord.ButtonStyle.gray, emoji="<:frank_pizza:1050272497062387823>")
     MusicEnjoyers=Button(label="Music Channels", style=discord.ButtonStyle.gray, emoji="<:frank_huh_duhs:1057140942630555658>")
@@ -97,7 +98,7 @@ async def sendButtonRoles():
         
         
 
-    view=View()
+    view=View(timeout=None)
     view.add_item(Foodies)
     view.add_item(MusicEnjoyers)
     view.add_item(ComicNerds)
@@ -105,6 +106,38 @@ async def sendButtonRoles():
     view.add_item(Artists)
     view.add_item(DMOffers)
     await client.get_channel(1054578163520376862).send('Click this button to sign up for deals and offers directly to your dm', view=view)
+async def sendStoreStatusToggle():
+    ToggleOn=Button(label='Toggle On',style=discord.ButtonStyle.green)
+    async def toggleOnCallback(button_info):
+        global openStatus
+        global openStatusUnspecified
+        openStatus = True
+        openStatusUnspecified = False
+        await button_info.response.send_message(f'Store Status set to {openStatus}', ephemeral=True)
+        await message.edit(view=ToggleOffView)
+    ToggleOff=Button(label='Toggle Off',style=discord.ButtonStyle.red)
+    async def toggleOffCallback(button_info):
+        global openStatus
+        global openStatusUnspecified
+        openStatus = False
+        openStatusUnspecified = False
+        await button_info.response.send_message(f'Store Status set to {openStatus}', ephemeral=True)
+        await message.edit(view=ToggleOnView)
+    
+    ToggleOn.callback=toggleOnCallback
+    ToggleOff.callback=toggleOffCallback
+    ToggleOnView=View(timeout=None)
+    ToggleOffView=View(timeout=None)
+    ToggleOnView.add_item(ToggleOn)
+    ToggleOffView.add_item(ToggleOff)
+    if openStatus == False:
+        message = await client.get_channel(1068022115057532969).send('Click button to Toggle Store Status', view=ToggleOnView)
+    elif openStatus == True:
+        message = await client.get_channel(1068022115057532969).send('Click button to Toggle Store Status', view=ToggleOffView)
+    
+
+openStatus=False
+openStatusUnspecified=True
 
 # Activate Bot
 class aclient(discord.Client):
@@ -138,7 +171,9 @@ class aclient(discord.Client):
                     ))
 
         await client.get_channel(1054578163520376862).purge()
+        await client.get_channel(1068022115057532969).purge()
         await sendButtonRoles()
+        await sendStoreStatusToggle()
 client = aclient()
 
 @client.event
@@ -164,7 +199,18 @@ tree = app_commands.CommandTree(client)
     guild=discord.Object(id=1053851544765874216))
 
 async def self(Interaction:discord.Interaction):
-    await Interaction.response.send_message('DogMahal / Ojata Records is open Tu-Sa from 11a-9p CST')
+    if openStatus == True:
+        openStatusMessage = '✅ Open'
+    elif openStatus == False:
+        openStatusMessage = '<:redx:1068012685272297532> Closed'
+    if openStatusUnspecified == True:
+        openStatusMessage = '<:dash:1068014028338770000> Unspecified'
+
+
+    await Interaction.response.send_message(embed=discord.Embed(
+        title=f'OjataMahal is Currently {openStatusMessage}',
+        description='```╔════════════════════════════════╗\n║ Sun: Closed                    ║\n╠════════════════════════════════╣\n║ Mon: Closed                    ║\n╠════════════════════════════════╣\n║ Tues: 11a - 5p                 ║\n╠════════════════════════════════╣\n║ Wed: 11a - 5p                  ║\n╠════════════════════════════════╣\n║ Thurs: 11a - 6p                ║\n╠════════════════════════════════╣\n║ Fri: 11a - 6p                  ║\n╠════════════════════════════════╣\n║ Sat: 11a - 5p                  ║\n╚════════════════════════════════╝\n```'
+    ))
 
 @tree.command(
     name='senddeal',
@@ -409,6 +455,15 @@ async def self(Interaction:discord.Interaction,messageid:str):
                 name=Interaction.user.name,
                 icon_url=Interaction.user.avatar
             ))
+
+@tree.command(
+    name="reboot",
+    description="Admin Only Command: Reboot DogmaBot",
+    guild=discord.Object(id=1053851544765874216)
+)
+async def self(Interaction:discord.Interaction):
+    await Interaction.response.send_message("Rebooting...")
+    sys.exit()
 
 
 
